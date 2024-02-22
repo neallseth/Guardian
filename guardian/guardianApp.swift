@@ -8,10 +8,12 @@
 import SwiftUI
 
 @main
-struct guardianApp: App {
+struct GuardianApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(timerManager: appDelegate.timerManager) 
         }
     }
 }

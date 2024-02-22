@@ -11,6 +11,8 @@
 		B8E656822B872A5800322CA9 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E656812B872A5800322CA9 /* ContentView.swift */; };
 		B8E656842B872A5B00322CA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B8E656832B872A5B00322CA9 /* Assets.xcassets */; };
 		B8E656872B872A5B00322CA9 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B8E656862B872A5B00322CA9 /* Preview Assets.xcassets */; };
+		B8E6568F2B872B8300322CA9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E6568E2B872B8300322CA9 /* AppDelegate.swift */; };
+		B8E656912B872DB000322CA9 /* TimerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E656902B872DB000322CA9 /* TimerManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +22,8 @@
 		B8E656832B872A5B00322CA9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B8E656862B872A5B00322CA9 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B8E656882B872A5B00322CA9 /* guardian.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = guardian.entitlements; sourceTree = "<group>"; };
+		B8E6568E2B872B8300322CA9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		B8E656902B872DB000322CA9 /* TimerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,8 +56,10 @@
 		B8E6567E2B872A5800322CA9 /* guardian */ = {
 			isa = PBXGroup;
 			children = (
+				B8E6568E2B872B8300322CA9 /* AppDelegate.swift */,
 				B8E6567F2B872A5800322CA9 /* guardianApp.swift */,
 				B8E656812B872A5800322CA9 /* ContentView.swift */,
+				B8E656902B872DB000322CA9 /* TimerManager.swift */,
 				B8E656832B872A5B00322CA9 /* Assets.xcassets */,
 				B8E656882B872A5B00322CA9 /* guardian.entitlements */,
 				B8E656852B872A5B00322CA9 /* Preview Content */,
@@ -139,6 +145,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B8E6568F2B872B8300322CA9 /* AppDelegate.swift in Sources */,
+				B8E656912B872DB000322CA9 /* TimerManager.swift in Sources */,
 				B8E656822B872A5800322CA9 /* ContentView.swift in Sources */,
 				B8E656802B872A5800322CA9 /* guardianApp.swift in Sources */,
 			);
