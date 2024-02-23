@@ -12,15 +12,18 @@ import UserNotifications
 class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     var window: NSWindow?
     var timerManager = TimerManager() // Reference to TimerManager
+    var statusItem: NSStatusItem?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         UNUserNotificationCenter.current().delegate = self
-        
+
         requestNotificationPermission()
         registerForLockUnlockNotifications()
-        timerManager.startTimer()
+
+        // Setup the menu bar item
+        setupMenuBarItem()
     }
-    
+
     func applicationWillTerminate(_ notification: Notification) {
         DistributedNotificationCenter.default().removeObserver(self)
     }
@@ -39,7 +42,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             }
         }
     }
-    
+
     private func registerForLockUnlockNotifications() {
         let notificationCenter = DistributedNotificationCenter.default()
         notificationCenter.addObserver(self, selector: #selector(screenLocked), name: NSNotification.Name("com.apple.screenIsLocked"), object: nil)
@@ -54,8 +57,34 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         timerManager.startTimer()
     }
 
-    // Handle notifications when the app is in the foreground
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.sound])
+    }
+
+    // MARK: - Menu Bar Setup
+    private func setupMenuBarItem() {
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        if let button = statusItem?.button {
+            button.image = NSImage(systemSymbolName: "clock", accessibilityDescription: "Clock")
+            button.action = #selector(toggleWindow(_:))
+        }
+        
+        let menu = NSMenu()
+        menu.addItem(NSMenuItem(title: "Open App", action: #selector(toggleWindow(_:)), keyEquivalent: "o"))
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        
+        statusItem?.menu = menu
+    }
+
+    @objc func toggleWindow(_ sender: Any?) {
+        // Implement logic to show/hide your app's main window or perform other actions
+        // This is where you could show the main app window if it's not visible, or bring it to the front if it is.
+        if let window = window {
+            window.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+        } else {
+            // If the window doesn't exist, create it or show an alert/error as appropriate
+        }
     }
 }
