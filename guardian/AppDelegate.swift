@@ -10,22 +10,27 @@ import SwiftUI
 import UserNotifications
 
 class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
-    var window: NSWindow?
-    var timerManager = TimerManager() // Reference to TimerManager
+    var timerManager = TimerManager()
     var statusItem: NSStatusItem?
+    var updateTimer: Timer?
+    var timerStatusMenuItem: NSMenuItem?
 
+    
     func applicationDidFinishLaunching(_ notification: Notification) {
-        UNUserNotificationCenter.current().delegate = self
+            UNUserNotificationCenter.current().delegate = self
+            
+            setupMenuBarItem()
 
-        requestNotificationPermission()
-        registerForLockUnlockNotifications()
-
-        // Setup the menu bar item
-        setupMenuBarItem()
-    }
+            updateTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(updateTimeText), userInfo: nil, repeats: true)
+            updateTimeText()
+            requestNotificationPermission()
+            registerForLockUnlockNotifications()
+            timerManager.startTimer()
+        }
 
     func applicationWillTerminate(_ notification: Notification) {
         DistributedNotificationCenter.default().removeObserver(self)
+        updateTimer?.invalidate()
     }
 
     private func requestNotificationPermission() {
@@ -42,12 +47,62 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             }
         }
     }
-
+    
     private func registerForLockUnlockNotifications() {
         let notificationCenter = DistributedNotificationCenter.default()
         notificationCenter.addObserver(self, selector: #selector(screenLocked), name: NSNotification.Name("com.apple.screenIsLocked"), object: nil)
         notificationCenter.addObserver(self, selector: #selector(screenUnlocked), name: NSNotification.Name("com.apple.screenIsUnlocked"), object: nil)
     }
+    
+    @objc func openSettings() {
+        var settingsWindow: NSWindow?
+
+        let contentView = SettingsView(timerManager: timerManager) // Pass the timerManager instance
+
+        // Check if the window is already open logic...
+        if settingsWindow == nil {
+            settingsWindow = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 300, height: 120),
+                styleMask: [.titled, .closable],
+                backing: .buffered, defer: false)
+            settingsWindow?.center()
+            settingsWindow?.setFrameAutosaveName("Settings")
+            settingsWindow?.contentView = NSHostingView(rootView: contentView)
+            settingsWindow?.makeKeyAndOrderFront(nil)
+            settingsWindow?.isReleasedWhenClosed = false
+        } else {
+            settingsWindow?.makeKeyAndOrderFront(nil)
+        }
+    }
+
+    
+    @objc func updateMenuBarItem() {
+        guard let button = statusItem?.button else { return }
+        
+        let elapsedTimeInMinutes = timerManager.elapsedTimeInMinutes // Ensure this property exists and is updated in TimerManager
+        
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = .center
+        
+        let textAttributes: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: NSFont.systemFontSize),
+            .paragraphStyle: paragraphStyle
+        ]
+        
+        let icon = NSTextAttachment()
+        icon.image = NSImage(systemSymbolName: "eye.fill", accessibilityDescription: nil)
+        let iconString = NSAttributedString(attachment: icon)
+        
+        let textString = NSAttributedString(string: " \(elapsedTimeInMinutes) min", attributes: textAttributes)
+        
+        let finalString = NSMutableAttributedString()
+        finalString.append(iconString)
+        finalString.append(textString)
+        
+        button.attributedTitle = finalString
+    }
+
+    
 
     @objc func screenLocked() {
         timerManager.resetTimer()
@@ -57,34 +112,55 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         timerManager.startTimer()
     }
 
-    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        completionHandler([.sound])
-    }
-
-    // MARK: - Menu Bar Setup
     private func setupMenuBarItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem?.button {
-            button.image = NSImage(systemSymbolName: "clock", accessibilityDescription: "Clock")
-            button.action = #selector(toggleWindow(_:))
+            button.image = NSImage(systemSymbolName: "eye.fill", accessibilityDescription: "Clock")
         }
         
         let menu = NSMenu()
-        menu.addItem(NSMenuItem(title: "Open App", action: #selector(toggleWindow(_:)), keyEquivalent: "o"))
+        
+        timerStatusMenuItem = NSMenuItem(title: "Timer: 0:00", action: nil, keyEquivalent: "")
+        menu.addItem(timerStatusMenuItem!)
+        menu.addItem(withTitle: "Reset Timer", action: #selector(resetTimer), keyEquivalent: "r")
+
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        let settingsMenuItem = NSMenuItem(title: "Settings", action: #selector(openSettings), keyEquivalent: "")
+            menu.addItem(settingsMenuItem)
+
+        menu.addItem(withTitle: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        
+
         
         statusItem?.menu = menu
+        
     }
 
-    @objc func toggleWindow(_ sender: Any?) {
-        // Implement logic to show/hide your app's main window or perform other actions
-        // This is where you could show the main app window if it's not visible, or bring it to the front if it is.
-        if let window = window {
-            window.makeKeyAndOrderFront(nil)
-            NSApp.activate(ignoringOtherApps: true)
-        } else {
-            // If the window doesn't exist, create it or show an alert/error as appropriate
+    
+    @objc func updateTimeText() {
+            let elapsedTimeInMinutes = timerManager.elapsedTimeInMinutes
+            
+            if let button = statusItem?.button {
+                button.title = "\(elapsedTimeInMinutes) min"
+            }
+        
+        let elapsedTimeFormatted = timerManager.elapsedTimeFormatted
+            timerStatusMenuItem?.title = "Timer: \(elapsedTimeFormatted)"
         }
+    
+    @objc func startTimer() {
+        timerManager.startTimer()
+        // Optionally, update menu item titles or states based on the timer's status
+    }
+    
+    @objc func resetTimer() {
+        timerManager.resetTimer()
+        timerManager.startTimer()
+    }
+
+    // Handle notifications when the app is in the foreground
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.sound])
     }
 }
+

@@ -12,8 +12,8 @@ struct GuardianApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        WindowGroup {
-            ContentView(timerManager: appDelegate.timerManager) 
+        Settings {
+            Text("No window UI. Configure the app from the menu bar.")
         }
     }
 }
