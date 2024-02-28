@@ -1,27 +1,26 @@
-//
-//  SettingsView.swift
-//  guardian
-//
-//  Created by Neall Seth on 2/26/24.
-//
-
 import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var timerManager: TimerManager
 
     var body: some View {
-        Form {
-            VStack(alignment: .leading, spacing: 20) {
-                Text("Timer Length")
-                    .font(.headline)
-                TextField("Minutes", value: $timerManager.preferredTimerLength, format: .number)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+        VStack {
+            Form {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("Alert after")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    
+                    TextField("Minutes", value: $timerManager.preferredTimerLengthMinutes, format: .number)
+                        .textFieldStyle(PlainTextFieldStyle())
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 5).strokeBorder(Color.gray, lineWidth: 1))
+                }
+                .padding(.horizontal, 20)
             }
-            .padding()
+            .frame(width: 350, height: 200)
+            .padding(.bottom, 10)
         }
-        .frame(width: 300, height: 120)
-        .padding()
+        .padding(.vertical, 10)
     }
 }
-
