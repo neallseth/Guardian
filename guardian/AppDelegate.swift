@@ -8,28 +8,34 @@
 import Cocoa
 import SwiftUI
 import UserNotifications
+import Combine
 
 class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     var timerManager = TimerManager()
         var statusItem: NSStatusItem?
-        var updateTimer: Timer?
         var timerStatusMenuItem: NSMenuItem?
         var settingsWindow: NSWindow?
+    private var cancellables = Set<AnyCancellable>()
     
     func applicationDidFinishLaunching(_ notification: Notification) {
-            UNUserNotificationCenter.current().delegate = self
-            
-            setupMenuBarItem()
-            updateTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(updateTimeText), userInfo: nil, repeats: true)
-            updateTimeText()
-            requestNotificationPermission()
-            registerForLockUnlockNotifications()
-            timerManager.startTimer()
-        }
+        UNUserNotificationCenter.current().delegate = self
+        
+        setupMenuBarItem()
+        updateTimeText()
+        requestNotificationPermission()
+        registerForLockUnlockNotifications()
+        timerManager.startTimer()
+        
+        timerManager.$elapsedTime
+                    .receive(on: RunLoop.main)
+                    .sink { [weak self] _ in
+                        self?.updateTimeText()
+                    }
+                    .store(in: &cancellables)
+    }
 
     func applicationWillTerminate(_ notification: Notification) {
         DistributedNotificationCenter.default().removeObserver(self)
-        updateTimer?.invalidate()
     }
 
     private func requestNotificationPermission() {
@@ -104,15 +110,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
     
     @objc func updateTimeText() {
-        let elapsedTimeInMinutes = timerManager.elapsedTime/60
+            let elapsedTimeInMinutes = timerManager.elapsedTime / 60
+            let elapsedTimeInSeconds = timerManager.elapsedTime % 60
+
+            if let button = statusItem?.button {
+                button.title = "\(elapsedTimeInMinutes)m"
+            }
             
-        if let button = statusItem?.button {
-                button.title = "\(elapsedTimeInMinutes) min"
-        }
-        
-        let minutes = timerManager.elapsedTime / 60
-        let seconds = timerManager.elapsedTime % 60
-        timerStatusMenuItem?.title = "Time: \(String(format: "%d:%02d", minutes, seconds))"
+            timerStatusMenuItem?.title = "Screen time: \(String(format: "%02d:%02d", elapsedTimeInMinutes, elapsedTimeInSeconds))"
         }
     
     @objc func resetTimer() {

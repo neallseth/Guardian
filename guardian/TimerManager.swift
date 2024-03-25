@@ -11,12 +11,14 @@ import UserNotifications
 
 class TimerManager: ObservableObject {
     @Published var timerStatus: String = "Timer is not running"
+        @Published var elapsedTime: Int = 0  // Ensure this is published to allow Combine to observe changes
         var timer: Timer?
-        var elapsedTime: Int = 0
         var startTime: Date?
+
         var isTimerRunning: Bool {
             return timer != nil
         }
+    
     @Published var preferredTimerLengthMinutes: Int {
             didSet {
                 UserDefaults.standard.set(preferredTimerLengthMinutes, forKey: "preferredTimerLengthMinutes")

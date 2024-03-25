@@ -1,3 +1,11 @@
+//
+//  SettingsView.swift
+//  guardian
+//
+//  Created by Neall Seth on 2/21/24.
+//
+
+
 import SwiftUI
 
 struct SettingsView: View {
