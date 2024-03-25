@@ -63,7 +63,7 @@ class TimerManager: ObservableObject {
     private func scheduleNotification(seconds: Int) {
         let content = UNMutableNotificationContent()
         content.title = "Take a break"
-        content.body = "You have been on your computer for \(seconds/60) minutes."
+        content.body = "\(seconds/60) minutes of continuous screen time"
 
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil) // Trigger now
         UNUserNotificationCenter.current().add(request) { error in
